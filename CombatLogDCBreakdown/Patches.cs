@@ -143,13 +143,20 @@ public static class SavingThrowMessagePatcher
             }
             foreach (var modifier in breakdown.BonusDC?.Modifiers ?? new List<Modifier>())
             {
-                if (modifier.Fact.SourceItem != null)
+                try
                 {
-                    builder.AppendLine($"{modifier.Fact.SourceItem.Name}: {UIUtility.AddSign(modifier.Value)}");
+                    if (modifier.Fact?.SourceItem != null)
+                    {
+                        builder.AppendLine($"{modifier.Fact?.SourceItem?.Name}: {UIUtility.AddSign(modifier.Value)}");
+                    }
+                    else
+                    {
+                        builder.AppendLine($"{modifier.Fact?.Name}: {UIUtility.AddSign(modifier.Value)}");
+                    }
                 }
-                else
+                catch (System.Exception)
                 {
-                    builder.AppendLine($"{modifier.Fact.Name}: {UIUtility.AddSign(modifier.Value)}");
+                    builder.AppendLine($"error: {UIUtility.AddSign(modifier.Value)}");
                 }
             }
         }
