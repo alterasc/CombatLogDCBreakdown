@@ -1,7 +1,11 @@
 ﻿using HarmonyLib;
+using Kingmaker.Blueprints.Root.Strings;
+using Kingmaker.Blueprints.Root.Strings.GameLog;
+using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
+using Kingmaker.Localization;
 using Kingmaker.RuleSystem.Rules;
 using Kingmaker.RuleSystem.Rules.Abilities;
 using Kingmaker.UI.Common;
@@ -10,7 +14,6 @@ using Kingmaker.UnitLogic.Abilities;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.Abilities.Components;
 using Kingmaker.UnitLogic.Mechanics.Actions;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
@@ -105,61 +108,79 @@ internal static class AbilityEffectRunActionPatch
 /// </summary>
 public static class SavingThrowMessagePatcher
 {
-    private static MethodInfo _method = AccessTools.Method(typeof(StatModifiersBreakdown), nameof(StatModifiersBreakdown.AppendModifiersBreakdown));
     public static IEnumerable<CodeInstruction> CallReplacingTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        foreach (var instruction in instructions)
-        {
-            if (!instruction.Calls(_method))
-            {
-                yield return instruction;
-            }
-            else
-            {
-                yield return new(OpCodes.Ldarg_1);
-                yield return CodeInstruction.Call(typeof(SavingThrowMessagePatcher), nameof(AppendModifiersBreakdownExtended));
-                Main.log.Log("Replaced AppendModifiersBreakdown call!");
-            }
-        }
+        var matcher = new CodeMatcher(instructions)
+            .MatchEndForward(
+                CodeMatch.LoadsField(AccessTools.Field(typeof(SavingThrowMessage), nameof(SavingThrowMessage.Tooltip))),
+                CodeMatch.Calls(AccessTools.Method(typeof(LocalizedString), "op_Implicit")),
+                CodeMatch.Calls(AccessTools.Method(typeof(StringBuilder), nameof(StringBuilder.Append), [typeof(string)]))
+            )
+            .InsertAfter(
+                new CodeInstruction(OpCodes.Ldarg_1),
+                CodeInstruction.Call(typeof(SavingThrowMessagePatcher), nameof(AppendModifiersBreakdownExtended))
+            );
+        return matcher.Instructions();
     }
 
-    public static void AppendModifiersBreakdownExtended(StringBuilder builder, string text, RuleSavingThrow rule)
+    private static LocalizedString spellLevel = new LocalizedString { m_Key = "6221aa8e-5d21-44d8-9c1f-921e081c4ae3" };
+    public static StringBuilder AppendModifiersBreakdownExtended(StringBuilder builder, RuleSavingThrow rule)
     {
         if (BreakdownStorage.RuleSavingThrowTable.TryGetValue(rule, out var breakdown))
         {
             builder.AppendLine();
-            builder.AppendLine($"<b>Difficulty (DC): {rule.DifficultyClass}</b>");
+            builder.AppendLine();
+            builder.AppendLine($"<b>{ModLocalization.DCString} {rule.DifficultyClass}</b>");
             if (breakdown.BaseDC != 0)
             {
-                builder.AppendLine($"Base: {breakdown.BaseDC}");
+                builder.AppendLine($"{UIStrings.Instance.Tooltips.BaseValue}: {breakdown.BaseDC}");
             }
             if (breakdown.SpellLevel > 0)
             {
-                builder.AppendLine($"Spell Level: {UIUtility.AddSign(breakdown.SpellLevel)}");
+                builder.Append($"{spellLevel}: ");
+                AppendStat(builder, breakdown.SpellLevel);
             }
             if (breakdown.StatBonus != 0)
             {
-                builder.AppendLine($"{UIUtility.GetStatText(breakdown.StatBonusSource)}: {UIUtility.AddSign(breakdown.StatBonus)}");
+                builder.Append($"{UIUtility.GetStatText(breakdown.StatBonusSource)}: ");
+                AppendStat(builder, breakdown.StatBonus);
             }
-            foreach (var modifier in breakdown.BonusDC?.Modifiers ?? new List<Modifier>())
+            IEnumerable<Modifier> allBonuses = breakdown.BonusDC?.Modifiers ?? new List<Modifier>();
+            if (breakdown.SecondaryBonusDC != null)
+            {
+                allBonuses = allBonuses.Concat(breakdown.SecondaryBonusDC?.Modifiers ?? new List<Modifier>());
+            }
+            foreach (var modifier in allBonuses)
             {
                 try
                 {
+                    string name;
                     if (modifier.Fact?.SourceItem != null)
                     {
-                        builder.AppendLine($"{modifier.Fact?.SourceItem?.Name}: {UIUtility.AddSign(modifier.Value)}");
+                        name = modifier.Fact?.SourceItem?.Name ?? modifier.Fact?.SourceItem?.Blueprint?.name;
                     }
                     else
                     {
-                        builder.AppendLine($"{modifier.Fact?.Name}: {UIUtility.AddSign(modifier.Value)}");
+                        name = modifier.Fact?.Name ?? modifier.Fact?.Blueprint?.name;
                     }
+                    StatModifiersBreakdown.AppendBonus(builder, modifier.Value, name, modifier.Descriptor, null);
                 }
-                catch (System.Exception)
+                catch (Exception)
                 {
                     builder.AppendLine($"error: {UIUtility.AddSign(modifier.Value)}");
                 }
             }
         }
+        return builder;
+    }
+
+    private static void AppendStat(StringBuilder sb, int bonusValue)
+    {
+        string value = (bonusValue < 0) ? StatModifiersBreakdown.PenaltyColor : StatModifiersBreakdown.BonusColor;
+        sb.Append("<color=#").Append(value).Append('>');
+        sb.Append(UIUtility.AddSign(new int?(bonusValue)));
+        sb.Append("</color>");
+        sb.AppendLine();
     }
 }
 
@@ -240,6 +261,36 @@ public static class RuleCalculateAbilityParamsPatcher
         if (BreakdownStorage.BreakdownTable.TryGetValue(__instance, out var breakdown))
         {
             BreakdownStorage.BreakdownTable.Add(__result, breakdown);
+        }
+    }
+}
+
+public static class IncreaseCastersSavingThrowTypeDCPatcher
+{
+    private static MethodInfo _method = AccessTools.Method(typeof(RuleSavingThrow), nameof(RuleSavingThrow.AddBonusDC));
+    public static IEnumerable<CodeInstruction> CallReplacingTranspiler(IEnumerable<CodeInstruction> instructions)
+    {
+        foreach (var instruction in instructions)
+        {
+            if (!instruction.Calls(_method))
+            {
+                yield return instruction;
+            }
+            else
+            {
+                yield return new(OpCodes.Ldarg_0);
+                yield return CodeInstruction.Call(typeof(IncreaseCastersSavingThrowTypeDCPatcher), nameof(AddBonusDCComp));
+                Main.log.Log("Replaced RuleSavingThrow.AddBonusDC call!");
+            }
+        }
+    }
+    public static void AddBonusDCComp(RuleSavingThrow rule, int bonus, IncreaseCastersSavingThrowTypeDC comp)
+    {
+        rule.AddBonusDC(bonus);
+        if (BreakdownStorage.RuleSavingThrowTable.TryGetValue(rule, out var breakdown))
+        {
+            breakdown.SecondaryBonusDC ??= new();
+            breakdown.SecondaryBonusDC.Add(new Modifier(bonus, comp.Fact, ModifierDescriptor.UntypedStackable));
         }
     }
 }

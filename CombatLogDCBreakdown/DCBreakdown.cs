@@ -11,6 +11,7 @@ public class DCBreakdown
     public int SpellLevel;
     public int StatBonus;
     public ModifiableBonus BonusDC;
+    public ModifiableBonus SecondaryBonusDC;
     internal StatType StatBonusSource;
 }
 

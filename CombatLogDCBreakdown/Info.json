@@ -2,11 +2,11 @@
   "Id": "CombatLogDCBreakdown",
   "DisplayName": "Combat log DC breakdown",
   "Author": "AlterAsc",
-  "Version": "0.1.0",
+  "Version": "0.2.0",
   "ManagerVersion": "0.27.11",
   "Requirements": [],
   "AssemblyName": "CombatLogDCBreakdown.dll",
   "EntryMethod": "CombatLogDCBreakdown.Main.Load",
-  "HomePage": "",
-  "Repository": ""
+  "HomePage": "https://github.com/alterasc/CombatLogDCBreakdown",
+  "Repository": "https://raw.githubusercontent.com/alterasc/CombatLogDCBreakdown/main/Repository.json"
 }

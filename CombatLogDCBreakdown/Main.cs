@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
 using Kingmaker.Blueprints.Root.Strings.GameLog;
 using Kingmaker.Designers.Mechanics.Facts;
+using Kingmaker.Localization;
+using Kingmaker.Localization.Shared;
 using Kingmaker.RuleSystem.Rules.Abilities;
 using Kingmaker.UnitLogic.Abilities;
 using Kingmaker.UnitLogic.Abilities.Components;
@@ -24,7 +26,6 @@ public static class Main
 #if DEBUG
         modEntry.OnUnload = OnUnload;
 #endif
-        modEntry.OnGUI = OnGUI;
         HarmonyInstance = new Harmony(modEntry.Info.Id);
         HarmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -94,12 +95,15 @@ public static class Main
             original: AccessTools.Method(typeof(SavingThrowMessage), nameof(SavingThrowMessage.GetData)),
             transpiler: new HarmonyMethod(typeof(SavingThrowMessagePatcher), nameof(SavingThrowMessagePatcher.CallReplacingTranspiler)));
 
+        HarmonyInstance.Patch(
+            original: AccessTools.Method(typeof(LocalizationManager), nameof(LocalizationManager.LoadPack), [typeof(Locale)]),
+            postfix: new HarmonyMethod(typeof(ModLocalization), nameof(ModLocalization.Init)));
+
+        HarmonyInstance.Patch(
+            original: AccessTools.Method(typeof(IncreaseCastersSavingThrowTypeDC), nameof(IncreaseCastersSavingThrowTypeDC.OnEventAboutToTrigger)),
+            transpiler: new HarmonyMethod(typeof(IncreaseCastersSavingThrowTypeDCPatcher), nameof(IncreaseCastersSavingThrowTypeDCPatcher.CallReplacingTranspiler)));
+
         return true;
-    }
-
-    public static void OnGUI(UnityModManager.ModEntry modEntry)
-    {
-
     }
 
 #if DEBUG
