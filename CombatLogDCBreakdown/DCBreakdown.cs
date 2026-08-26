@@ -5,14 +5,20 @@ using System.Runtime.CompilerServices;
 
 namespace CombatLogDCBreakdown;
 
+/// <summary>
+/// Data class for storing DC breakdown
+/// </summary>
 public class DCBreakdown
 {
     public int BaseDC;
     public int SpellLevel;
     public int StatBonus;
+    public bool IgnoreDCBonuses;
     public ModifiableBonus BonusDC;
     public ModifiableBonus SecondaryBonusDC;
-    internal StatType StatBonusSource;
+    public StatType StatBonusSource;
+    public int EnemyDifficultyBonus;
+    public int EnemyDCCap;
 }
 
 public static class BreakdownStorage

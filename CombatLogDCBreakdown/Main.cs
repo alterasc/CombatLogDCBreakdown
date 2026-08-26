@@ -1,12 +1,4 @@
 ﻿using HarmonyLib;
-using Kingmaker.Blueprints.Root.Strings.GameLog;
-using Kingmaker.Designers.Mechanics.Facts;
-using Kingmaker.Localization;
-using Kingmaker.Localization.Shared;
-using Kingmaker.RuleSystem.Rules.Abilities;
-using Kingmaker.UnitLogic.Abilities;
-using Kingmaker.UnitLogic.Abilities.Components;
-using Kingmaker.UnitLogic.Mechanics.Actions;
 using System.Reflection;
 using UnityModManagerNet;
 
@@ -27,82 +19,15 @@ public static class Main
         modEntry.OnUnload = OnUnload;
 #endif
         HarmonyInstance = new Harmony(modEntry.Info.Id);
-        HarmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
-
-        var callReplacer = new HarmonyMethod(typeof(CalculateAbilityParamsPatcher), nameof(CalculateAbilityParamsPatcher.CallReplacingTranspiler));
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(AbilityFocusParametrized), nameof(AbilityFocusParametrized.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(ArcaneBloodlineArcana), nameof(ArcaneBloodlineArcana.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(ExpandedArsenalMagicSchools), nameof(ExpandedArsenalMagicSchools.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(IncreaseAllSpellsDC), nameof(IncreaseAllSpellsDC.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(IncreaseSpellContextDescriptorDC), nameof(IncreaseSpellContextDescriptorDC.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(IncreaseSpellDC), nameof(IncreaseSpellDC.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(IncreaseSpellDescriptorDC), nameof(IncreaseSpellDescriptorDC.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(IncreaseSpellSchoolDC), nameof(IncreaseSpellSchoolDC.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(IncreaseSpellSpellbookDC), nameof(IncreaseSpellSpellbookDC.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(SpellFocusParametrized), nameof(SpellFocusParametrized.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(AbilityResourceOverride), nameof(AbilityResourceOverride.OnEventAboutToTrigger)),
-            transpiler: callReplacer);
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(RuleCalculateAbilityParams), nameof(RuleCalculateAbilityParams.OnTrigger)),
-            postfix: new HarmonyMethod(typeof(RuleCalculateAbilityParamsPatcher), nameof(RuleCalculateAbilityParamsPatcher.AfterParamsCalculation)));
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(ContextActionSavingThrow), nameof(ContextActionSavingThrow.RunAction)),
-            transpiler: new HarmonyMethod(typeof(SavingThrowCreatePatcher), nameof(SavingThrowCreatePatcher.CallReplacingTranspiler)));
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(AbilityParams), nameof(AbilityParams.Clone)),
-            postfix: new HarmonyMethod(typeof(RuleCalculateAbilityParamsPatcher), nameof(RuleCalculateAbilityParamsPatcher.CopyOnClone)));
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(AbilityEffectRunAction), nameof(AbilityEffectRunAction.CreateSavingThrow)),
-            postfix: new HarmonyMethod(typeof(AbilityEffectRunActionPatch), nameof(AbilityEffectRunActionPatch.CreateSavingThrowExtended)));
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(SavingThrowMessage), nameof(SavingThrowMessage.GetData)),
-            transpiler: new HarmonyMethod(typeof(SavingThrowMessagePatcher), nameof(SavingThrowMessagePatcher.CallReplacingTranspiler)));
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(LocalizationManager), nameof(LocalizationManager.LoadPack), [typeof(Locale)]),
-            postfix: new HarmonyMethod(typeof(ModLocalization), nameof(ModLocalization.Init)));
-
-        HarmonyInstance.Patch(
-            original: AccessTools.Method(typeof(IncreaseCastersSavingThrowTypeDC), nameof(IncreaseCastersSavingThrowTypeDC.OnEventAboutToTrigger)),
-            transpiler: new HarmonyMethod(typeof(IncreaseCastersSavingThrowTypeDCPatcher), nameof(IncreaseCastersSavingThrowTypeDCPatcher.CallReplacingTranspiler)));
-
+        try
+        {
+            HarmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
+        }
+        catch
+        {
+            HarmonyInstance.UnpatchAll(HarmonyInstance.Id);
+            throw;
+        }
         return true;
     }
 
