@@ -92,6 +92,7 @@ public static class RuleCalculateAbilityParamsPatcher
         {
             num5 = __instance.ReplaceStatBonusModifier.Value;
         }
+        var bonusAdded = false;
         if (num3 < 0)
         {
             num3 = 10 + num2;
@@ -102,6 +103,7 @@ public static class RuleCalculateAbilityParamsPatcher
             else
             {
                 num3 += num5;
+                bonusAdded = true;
             }
         }
         if (!__instance.IgnoreDCBonuses)
@@ -129,7 +131,7 @@ public static class RuleCalculateAbilityParamsPatcher
         {
             BaseDC = __instance.ReplaceDC ?? 10,
             SpellLevel = __instance.Result.SpellLevel,
-            StatBonus = num5,
+            StatBonus = bonusAdded ? num5 : 0,
             StatBonusSource = statBonusSource,
             IgnoreDCBonuses = __instance.IgnoreDCBonuses,
             BonusDC = __instance.m_BonusDC,

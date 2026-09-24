@@ -3,6 +3,7 @@ using Kingmaker.Blueprints.Root.Strings;
 using Kingmaker.Blueprints.Root.Strings.GameLog;
 using Kingmaker.Localization;
 using Kingmaker.RuleSystem.Rules;
+using Kingmaker.UI;
 using Kingmaker.UI.Common;
 using System.Reflection.Emit;
 using System.Text;
@@ -33,7 +34,7 @@ public static class SavingThrowMessagePatcher
     }
 
     private static readonly LocalizedString spellLevel = new() { m_Key = "6221aa8e-5d21-44d8-9c1f-921e081c4ae3" };
-    
+
     private static readonly LocalizedString difficulty = new() { m_Key = "a3a90870-c80e-4b0e-842f-15a70493b202" };
     public static StringBuilder AppendModifiersBreakdownExtended(StringBuilder builder, RuleSavingThrow rule)
     {
@@ -56,23 +57,19 @@ public static class SavingThrowMessagePatcher
                 builder.Append($"{UIUtility.GetStatText(breakdown.StatBonusSource)}: ");
                 AppendStat(builder, breakdown.StatBonus);
             }
-            IEnumerable<Modifier> allBonuses = breakdown.BonusDC?.Modifiers ?? new List<Modifier>();
+            IEnumerable<Modifier> allBonuses = breakdown.IgnoreDCBonuses ? [] : breakdown.BonusDC?.Modifiers ?? [];
             if (breakdown.SecondaryBonusDC != null)
             {
-                allBonuses = allBonuses.Concat(breakdown.SecondaryBonusDC?.Modifiers ?? new List<Modifier>());
+                allBonuses = allBonuses.Concat(breakdown.SecondaryBonusDC?.Modifiers ?? []);
             }
             foreach (var modifier in allBonuses)
             {
                 try
                 {
-                    string name;
-                    if (modifier.Fact?.SourceItem != null)
+                    string name = StatModifiersBreakdown.GetBonusSourceText((IUIDataProvider)modifier.Fact?.SourceItem ?? modifier.Fact, true);
+                    if (string.IsNullOrEmpty(name) && modifier.Fact.Blueprint != null)
                     {
-                        name = modifier.Fact?.SourceItem?.Name ?? modifier.Fact?.SourceItem?.Blueprint?.name;
-                    }
-                    else
-                    {
-                        name = modifier.Fact?.Name ?? modifier.Fact?.Blueprint?.name;
+                        name = modifier.Fact.Blueprint.name;
                     }
                     StatModifiersBreakdown.AppendBonus(builder, modifier.Value, name, modifier.Descriptor, null);
                 }
