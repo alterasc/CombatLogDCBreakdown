@@ -13,5 +13,8 @@ public static class NameOverrides
     public static Dictionary<Guid, BlueprintReference<BlueprintFact>> Overrides = new()
     {
         { Guid.Parse("ea7c96bad79347318961e12a6642de66"), new() { deserializedGuid = BlueprintGuid.Parse("1c28fa1d710041289dd83e18dfc8316d") } }, //Cloak of Morta
+        { Guid.Parse("0a98787328ad435ea00c4b2a193ea7c2"), new() { deserializedGuid = BlueprintGuid.Parse("9b827777e51ec0540ba6a0cbea6ea84a") } }, //Cold Specialization 1
+        { Guid.Parse("fa40f1218b824073b7759dc0d4ca5a55"), new() { deserializedGuid = BlueprintGuid.Parse("9b827777e51ec0540ba6a0cbea6ea84a") } }, //Cold Specialization 2
+        { Guid.Parse("d2926dfd0c3d4918bff84d8c292e732a"), new() { deserializedGuid = BlueprintGuid.Parse("9b827777e51ec0540ba6a0cbea6ea84a") } }, //Cold Specialization 3
     };
 }
