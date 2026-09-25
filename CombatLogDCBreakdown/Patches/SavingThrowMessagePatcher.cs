@@ -69,7 +69,15 @@ public static class SavingThrowMessagePatcher
                     string name = StatModifiersBreakdown.GetBonusSourceText((IUIDataProvider)modifier.Fact?.SourceItem ?? modifier.Fact, true);
                     if (string.IsNullOrEmpty(name) && modifier.Fact.Blueprint != null)
                     {
-                        name = modifier.Fact.Blueprint.name;
+                        if (NameOverrides.Overrides.TryGetValue(modifier.Fact.Blueprint.AssetGuid.m_Guid, out var overrideBlueprint)
+                            && overrideBlueprint.Get() is IUIDataProvider uIDataProvider)
+                        {
+                            name = uIDataProvider.Name;
+                        }
+                        else
+                        {
+                            name = modifier.Fact.Blueprint.name;
+                        }
                     }
                     StatModifiersBreakdown.AppendBonus(builder, modifier.Value, name, modifier.Descriptor, null);
                 }
