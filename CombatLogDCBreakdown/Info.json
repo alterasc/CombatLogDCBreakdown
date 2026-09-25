@@ -2,7 +2,7 @@
   "Id": "CombatLogDCBreakdown",
   "DisplayName": "Combat log DC breakdown",
   "Author": "AlterAsc",
-  "Version": "1.0.2",
+  "Version": "1.0.3",
   "ManagerVersion": "0.27.11",
   "Requirements": [],
   "AssemblyName": "CombatLogDCBreakdown.dll",
