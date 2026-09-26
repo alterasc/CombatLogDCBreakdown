@@ -126,17 +126,15 @@ public static class RuleCalculateAbilityParamsPatcher
                 num3 = num3new;
             }
         }
-
-        BreakdownStorage.BreakdownTable.Add(__instance.Result, new DCBreakdown
-        {
-            BaseDC = __instance.ReplaceDC ?? 10,
-            SpellLevel = __instance.Result.SpellLevel,
-            StatBonus = bonusAdded ? num5 : 0,
-            StatBonusSource = statBonusSource,
-            IgnoreDCBonuses = __instance.IgnoreDCBonuses,
-            BonusDC = __instance.m_BonusDC,
-            EnemyDifficultyBonus = difficultyBonus,
-            EnemyDCCap = dcCap
-        });
+        BreakdownStorage.BreakdownTable.Add(__instance.Result, new DCBreakdown(
+            baseDC: __instance.ReplaceDC ?? 10,
+            spellLevel: __instance.Result.SpellLevel,
+            statBonus: bonusAdded ? num5 : 0,
+            ignoreDCBonuses: __instance.IgnoreDCBonuses,
+            bonusDC: __instance.m_BonusDC,
+            statBonusSource: statBonusSource,
+            enemyDifficultyBonus: difficultyBonus,
+            enemyDCCap: dcCap
+        ));
     }
 }

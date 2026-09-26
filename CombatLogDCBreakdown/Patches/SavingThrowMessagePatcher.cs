@@ -57,10 +57,10 @@ public static class SavingThrowMessagePatcher
                 builder.Append($"{UIUtility.GetStatText(breakdown.StatBonusSource)}: ");
                 AppendStat(builder, breakdown.StatBonus);
             }
-            IEnumerable<Modifier> allBonuses = breakdown.IgnoreDCBonuses ? [] : breakdown.BonusDC?.Modifiers ?? [];
-            if (breakdown.SecondaryBonusDC != null)
+            IEnumerable<Modifier> allBonuses = breakdown.Modifiers;
+            if (BreakdownStorage.RuleSavingThrowSecondaryBonusTable.TryGetValue(rule, out var secondaryBonuses))
             {
-                allBonuses = allBonuses.Concat(breakdown.SecondaryBonusDC?.Modifiers ?? []);
+                allBonuses = allBonuses.Concat(secondaryBonuses.Modifiers ?? []);
             }
             foreach (var modifier in allBonuses)
             {
