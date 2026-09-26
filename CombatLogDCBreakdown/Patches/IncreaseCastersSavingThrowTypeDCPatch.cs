@@ -4,7 +4,6 @@ using Kingmaker.Enums;
 using Kingmaker.RuleSystem.Rules;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 
 namespace CombatLogDCBreakdown.Patches;
 
@@ -32,23 +31,11 @@ public static class IncreaseCastersSavingThrowTypeDCPatch
     }
     public static void AddBonusDCComp(RuleSavingThrow rule, int bonus, IncreaseCastersSavingThrowTypeDC comp)
     {
-        var origBonus = rule.DifficultyClassMod;
         rule.AddBonusDC(bonus);
-        //Main.log.Log($"IncreaseCastersSavingThrowTypeDC: Added {bonus} to {rule.StatType} saving throw for {RuntimeHelpers.GetHashCode(rule)}. New mod: {rule.DifficultyClassMod}");
         if (BreakdownStorage.RuleSavingThrowTable.TryGetValue(rule, out _))
         {
             var secondaryBonus = BreakdownStorage.RuleSavingThrowSecondaryBonusTable.GetOrCreateValue(rule);
             secondaryBonus.Add(new Modifier(bonus, comp.Fact, ModifierDescriptor.UntypedStackable));
         }
-    }
-}
-
-[HarmonyPatch(typeof(RuleSavingThrow), nameof(RuleSavingThrow.DifficultyClassMod), MethodType.Setter)]
-public static class RuleSavingThrow_DifficultyMod_Setter_Patch
-{
-    [HarmonyPostfix]
-    public static void After(RuleSavingThrow __instance, int value)
-    {
-        Main.log.Log($"RuleSavingThrow.DifficultyClassMod setter called for {RuntimeHelpers.GetHashCode(__instance)}. New mod: {value}");
     }
 }
