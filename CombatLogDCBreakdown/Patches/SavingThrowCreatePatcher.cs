@@ -26,18 +26,24 @@ internal static class SavingThrowCreatePatcher
             }
             else
             {
+                yield return CodeInstruction.LoadLocal(0); // The only local in this method is local that holds conditional bonus
                 yield return CodeInstruction.Call(typeof(SavingThrowCreatePatcher), nameof(CreateSavingThrowExtended));
                 Main.log.Log("Replaced CreateSavingThrow call!");
             }
         }
     }
 
-    public static RuleSavingThrow CreateSavingThrowExtended(ContextActionSavingThrow action, UnitEntityData unit, int dc, bool persistentSpell)
+    public static RuleSavingThrow CreateSavingThrowExtended(ContextActionSavingThrow action, UnitEntityData unit, int dc, bool persistentSpell, int conditionalBonus)
     {
         var result = action.CreateSavingThrow(unit, dc, persistentSpell);
         if (BreakdownStorage.BreakdownTable.TryGetValue(action.Context.Params, out var breakdown))
         {
             BreakdownStorage.RuleSavingThrowTable.Add(result, breakdown);
+        }
+        if (conditionalBonus != 0)
+        {
+            var conditionalDCBonus = BreakdownStorage.RuleSavingThrowConditionalBonusTable.GetOrCreateValue(result);
+            conditionalDCBonus.Value = conditionalBonus;
         }
         return result;
     }

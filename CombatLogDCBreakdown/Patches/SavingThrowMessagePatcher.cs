@@ -86,6 +86,11 @@ public static class SavingThrowMessagePatcher
                     builder.AppendLine($"error: {UIUtility.AddSign(modifier.Value)}");
                 }
             }
+            if (BreakdownStorage.RuleSavingThrowConditionalBonusTable.TryGetValue(rule, out var conditionalBonus) && conditionalBonus.Value != 0)
+            {
+                builder.Append($"{ModLocalization.ConditionalBonusString} ");
+                AppendStat(builder, conditionalBonus.Value);
+            }
             if (breakdown.EnemyDifficultyBonus != 0)
             {
                 builder.Append($"{difficulty}: ");

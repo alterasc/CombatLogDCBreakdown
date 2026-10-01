@@ -23,12 +23,27 @@ internal static class ModLocalization
             {"zhCN", "难度（DC）："},
     };
 
+    private readonly static Dictionary<string, string> conditionalBonusTranslations = new()
+    {
+            {"enGB", "Conditional bonus:"},
+            {"deDE", "Bedingter Bonus:"},
+            {"esES", "Bonificación condicional:"},
+            {"frFR", "Bonus conditionnel :"},
+            {"itIT", "Bonus condizionale:"},
+            {"ptBR", "Bônus condicional:"},
+            {"ruRU", "Условный бонус:"},
+            {"zhCN", "条件加成："},
+    };
+
     public static LocalizedString DCString = new() { m_Key = "293aa85a-cc72-4e40-a658-6961ff23dc23" };
+    public static LocalizedString ConditionalBonusString = new() { m_Key = "390be091-baf6-43da-a827-a0ee97e21a13" };
 
     [HarmonyPostfix]
     public static void Init(LocalizationPack __result, Locale locale)
     {
         var name = translations.Get(locale.ToString()) ?? translations["enGB"];
         __result.PutString(DCString.m_Key, name);
+        var conditionalBonusName = conditionalBonusTranslations.Get(locale.ToString()) ?? conditionalBonusTranslations["enGB"];
+        __result.PutString(ConditionalBonusString.m_Key, conditionalBonusName);
     }
 }

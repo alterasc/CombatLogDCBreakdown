@@ -34,10 +34,23 @@ public class DCBreakdown
     public IEnumerable<Modifier> Modifiers => IgnoreDCBonuses ? [] : bonusDC?.Modifiers ?? [];
 }
 
+/// <summary>
+/// Boxed value of the conditional DC increase, see BreakdownStorage.RuleSavingThrowConditionalBonusTable.
+/// </summary>
+public class ConditionalDCBonus
+{
+    public int Value;
+}
+
 public static class BreakdownStorage
 {
     public static ConditionalWeakTable<AbilityParams, DCBreakdown> BreakdownTable = new();
     public static ConditionalWeakTable<RuleSavingThrow, DCBreakdown> RuleSavingThrowTable = new();
+    /// <summary>
+    /// Conditional DC increase that ContextActionSavingThrow adds to the DC directly in RunAction, after AbilityParams calculation.
+    /// Stored per RuleSavingThrow because, unlike the main breakdown, it is specific to the action that created the rule.
+    /// </summary>
+    public static ConditionalWeakTable<RuleSavingThrow, ConditionalDCBonus> RuleSavingThrowConditionalBonusTable = new();
     /// <summary>
     /// Secondary bonuses that are applied to RuleSavingThrow, not to calculation in AbilityParams.
     /// Stored separately to not pollute main breakdown object, because for continuous spells multiple
