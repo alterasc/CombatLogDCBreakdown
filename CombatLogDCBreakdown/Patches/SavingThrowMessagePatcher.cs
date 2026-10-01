@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Kingmaker.Blueprints.Root.Strings;
 using Kingmaker.Blueprints.Root.Strings.GameLog;
 using Kingmaker.Localization;

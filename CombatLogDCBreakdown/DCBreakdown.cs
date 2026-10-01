@@ -1,4 +1,4 @@
-﻿using Kingmaker.EntitySystem.Stats;
+using Kingmaker.EntitySystem.Stats;
 using Kingmaker.RuleSystem.Rules;
 using Kingmaker.UnitLogic.Abilities;
 using System.Runtime.CompilerServices;

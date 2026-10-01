@@ -1,4 +1,4 @@
-﻿using Kingmaker.Blueprints;
+using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Facts;
 
 namespace CombatLogDCBreakdown;

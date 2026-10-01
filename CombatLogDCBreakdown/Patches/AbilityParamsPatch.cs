@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Kingmaker.UnitLogic.Abilities;
 
 namespace CombatLogDCBreakdown.Patches;

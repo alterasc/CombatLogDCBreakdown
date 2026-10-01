@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Kingmaker.Localization;
 using Kingmaker.Localization.Shared;
 using Kingmaker.Utility;
