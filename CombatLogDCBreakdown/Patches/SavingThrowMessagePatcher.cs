@@ -54,7 +54,14 @@ public static class SavingThrowMessagePatcher
             }
             if (breakdown.StatBonus != 0)
             {
-                builder.Append($"{UIUtility.GetStatText(breakdown.StatBonusSource)}: ");
+                if ((int)breakdown.StatBonusSource == 341)
+                {
+                    builder.Append($"{ModLocalization.MythicRankString}: ");
+                }
+                else
+                {
+                    builder.Append($"{UIUtility.GetStatText(breakdown.StatBonusSource)}: ");
+                }
                 AppendStat(builder, breakdown.StatBonus);
             }
             IEnumerable<Modifier> allBonuses = breakdown.Modifiers;

@@ -93,16 +93,20 @@ public static class RuleCalculateAbilityParamsPatcher
             num5 = __instance.ReplaceStatBonusModifier.Value;
         }
         var bonusAdded = false;
+        var finalBonus = num5;
         if (num3 < 0)
         {
             num3 = 10 + num2;
             if (__instance.AbilityData != null && __instance.AbilityData.Spellbook != null && __instance.AbilityData.Spellbook.IsStandaloneMythic)
             {
-                num3 += __instance.AbilityData.Caster.Progression.MythicLevel;
+                finalBonus = __instance.AbilityData.Caster.Progression.MythicLevel;
+                num3 += finalBonus;
+                statBonusSource = (StatType)341; // Custom stat type for mythic level
+                bonusAdded = true;
             }
             else
             {
-                num3 += num5;
+                num3 += finalBonus;
                 bonusAdded = true;
             }
         }
@@ -130,7 +134,7 @@ public static class RuleCalculateAbilityParamsPatcher
         BreakdownStorage.BreakdownTable.Add(__instance.Result, new DCBreakdown(
             baseDC: __instance.ReplaceDC ?? 10,
             spellLevel: __instance.Result.SpellLevel,
-            statBonus: bonusAdded ? num5 : 0,
+            statBonus: bonusAdded ? finalBonus : 0,
             ignoreDCBonuses: __instance.IgnoreDCBonuses,
             bonusDC: __instance.m_BonusDC,
             statBonusSource: statBonusSource,
