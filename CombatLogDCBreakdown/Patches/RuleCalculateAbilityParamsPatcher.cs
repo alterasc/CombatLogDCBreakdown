@@ -115,7 +115,8 @@ public static class RuleCalculateAbilityParamsPatcher
         if (__instance.Initiator.IsPlayersEnemy)
         {
             DifficultyPresetsList.StatsAdjustmentPreset adjustmentPreset = BlueprintRoot.Instance.DifficultyList.GetAdjustmentPreset(SettingsRoot.Difficulty.StatsAdjustments);
-            num3 += adjustmentPreset.AbilityDCBonus;
+            difficultyBonus = adjustmentPreset.AbilityDCBonus;
+            num3 += difficultyBonus;
             if (__instance.Blueprint.GetComponent<AbilityDifficultyLimitDC>() != null)
             {
                 var num3new = RuleCalculateAbilityParams.LimitDC(num3, adjustmentPreset.AbilityDCLimit, adjustmentPreset.AbilityDCLimitCoeff);
