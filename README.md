@@ -4,4 +4,4 @@ Mod for Pathfinder: Wrath of the Righteous that provides breakdown of Difficulty
 
 This mod does not cover all situations, so breakdown might be missing sometimes from the log.
 
-If your Unity Mod Manager is version 0.32.5+, you might have issues. Downgrade to 0.32.4
+Additionally has the fix for missing stat bonus in saving throw breakdown. Compatible with TabletopTweaks-Base which has fix for this too. When both are present, TTT takes priority.
