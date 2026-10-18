@@ -5,6 +5,7 @@ using Kingmaker.Localization;
 using Kingmaker.RuleSystem.Rules;
 using Kingmaker.UI;
 using Kingmaker.UI.Common;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 
@@ -18,19 +19,33 @@ namespace CombatLogDCBreakdown.Patches;
 public static class SavingThrowMessagePatcher
 {
     [HarmonyTranspiler]
-    public static IEnumerable<CodeInstruction> CallReplacingTranspiler(IEnumerable<CodeInstruction> instructions)
+    public static IEnumerable<CodeInstruction> CallReplacingTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
     {
-        var matcher = new CodeMatcher(instructions)
-            .MatchEndForward(
-                CodeMatch.LoadsField(AccessTools.Field(typeof(SavingThrowMessage), nameof(SavingThrowMessage.Tooltip))),
-                CodeMatch.Calls(AccessTools.Method(typeof(LocalizedString), "op_Implicit")),
-                CodeMatch.Calls(AccessTools.Method(typeof(StringBuilder), nameof(StringBuilder.Append), [typeof(string)]))
-            )
-            .InsertAfter(
+        var codes = new List<CodeInstruction>(instructions);
+
+        var tooltipField = AccessTools.Field(typeof(SavingThrowMessage), nameof(SavingThrowMessage.Tooltip));
+        var implicitOp = AccessTools.Method(typeof(LocalizedString), "op_Implicit");
+        var appendMethod = AccessTools.Method(typeof(StringBuilder), nameof(StringBuilder.Append), [typeof(string)]);
+
+        for (int i = 0; i < codes.Count - 2; i++)
+        {
+            if (!codes[i].LoadsField(tooltipField))
+                continue;
+            if (!codes[i + 1].Calls(implicitOp))
+                continue;
+            if (!codes[i + 2].Calls(appendMethod))
+                continue;
+
+            codes.InsertRange(i + 3,
+            [
                 new CodeInstruction(OpCodes.Ldarg_1),
                 CodeInstruction.Call(typeof(SavingThrowMessagePatcher), nameof(AppendModifiersBreakdownExtended))
-            );
-        return matcher.Instructions();
+            ]);
+            Main.log.Log($"Patched {__originalMethod.ShortDescription()}");
+            return codes.AsEnumerable();
+        }
+        Helpers.ReportTranspilerFailure(__originalMethod);
+        return codes.AsEnumerable();
     }
 
     private static readonly LocalizedString spellLevel = new() { m_Key = "6221aa8e-5d21-44d8-9c1f-921e081c4ae3" };

@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.Enums;
 using Kingmaker.RuleSystem.Rules;
@@ -36,8 +36,9 @@ internal static class AddBonusDCPatches
     }
 
     [HarmonyTranspiler]
-    public static IEnumerable<CodeInstruction> CallReplacingTranspiler(IEnumerable<CodeInstruction> instructions)
+    public static IEnumerable<CodeInstruction> CallReplacingTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
     {
+        var patched = false;
         foreach (var instruction in instructions)
         {
             if (!instruction.Calls(_method))
@@ -48,8 +49,13 @@ internal static class AddBonusDCPatches
             {
                 yield return new(OpCodes.Ldarg_0);
                 yield return CodeInstruction.Call(typeof(AddBonusDCPatches), nameof(AddBonusDCComp));
-                Main.log.Log("Replaced AddBonusDC call!");
+                Main.log.Log($"Replaced AddBonusDC call in {__originalMethod.ShortDescription()}");
+                patched = true;
             }
+        }
+        if (!patched)
+        {
+            Helpers.ReportTranspilerFailure(__originalMethod);
         }
     }
     public static void AddBonusDCComp(RuleCalculateAbilityParams evt, int dc, ModifierDescriptor desc, UnitFactComponentDelegate comp)

@@ -3,6 +3,7 @@ using Kingmaker.EntitySystem.Entities;
 using Kingmaker.RuleSystem.Rules;
 using Kingmaker.UnitLogic.Mechanics.Actions;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace CombatLogDCBreakdown.Patches;
 
@@ -16,8 +17,9 @@ internal static class SavingThrowCreatePatcher
     private static readonly MethodInfo _method = AccessTools.Method(typeof(ContextActionSavingThrow), nameof(ContextActionSavingThrow.CreateSavingThrow));
 
     [HarmonyTranspiler]
-    public static IEnumerable<CodeInstruction> CallReplacingTranspiler(IEnumerable<CodeInstruction> instructions)
+    public static IEnumerable<CodeInstruction> CallReplacingTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
     {
+        var patched = false;
         foreach (var instruction in instructions)
         {
             if (!instruction.Calls(_method))
@@ -26,10 +28,15 @@ internal static class SavingThrowCreatePatcher
             }
             else
             {
-                yield return CodeInstruction.LoadLocal(0); // The only local in this method is local that holds conditional bonus
+                yield return new CodeInstruction(OpCodes.Ldloc_0); // The only local in this method is local that holds conditional bonus
                 yield return CodeInstruction.Call(typeof(SavingThrowCreatePatcher), nameof(CreateSavingThrowExtended));
-                Main.log.Log("Replaced CreateSavingThrow call!");
+                Main.log.Log($"Replaced CreateSavingThrow call in {__originalMethod.ShortDescription()}!");
+                patched = true;
             }
+        }
+        if (!patched)
+        {
+            Helpers.ReportTranspilerFailure(__originalMethod);
         }
     }
 
