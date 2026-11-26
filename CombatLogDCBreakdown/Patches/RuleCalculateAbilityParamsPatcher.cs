@@ -25,6 +25,17 @@ public static class RuleCalculateAbilityParamsPatcher
     [HarmonyPostfix]
     public static void AfterParamsCalculation(RuleCalculateAbilityParams __instance)
     {
+        if (__instance.ReplaceDC != null && __instance.AbilityData?.ShadowSpellSettings != null)
+        {
+            // Shadow spells calculate DC earlier, so we just copy original value.
+            AbilityParams parentParams = __instance.AbilityData.ConvertedFrom.CalculateParams();
+            if (parentParams != null && BreakdownStorage.BreakdownTable.TryGetValue(parentParams, out DCBreakdown parentBreakdown))
+            {
+                BreakdownStorage.BreakdownTable.Add(__instance.Result, parentBreakdown);
+                return;
+            }
+        }
+
         int num = __instance.ReplaceCasterLevel ?? -1;
         int num2 = __instance.ReplaceSpellLevel ?? -1;
         int num3 = __instance.ReplaceDC ?? -1;
